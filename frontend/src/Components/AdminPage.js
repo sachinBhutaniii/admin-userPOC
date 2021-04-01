@@ -120,12 +120,12 @@ const AdminPage = () => {
   };
 
   //get category from id
-  const getCategory = id => {
-    // console.log(id);
-    const categ = category.filter(cat => cat._id == id);
-    // console.log("Cat is ", categ);
-    return categ[0].name; //filter returns an object
-  };
+  // const getCategory = id => {
+  //   // console.log(id);
+  //   const categ = category.filter(cat => cat._id == id);
+  //   // console.log("Cat is ", categ);
+  //   return categ[0].name; //filter returns an object
+  // };
 
   const deletedata = index => {
     // console.log(data[index]._id);
@@ -276,7 +276,7 @@ const AdminPage = () => {
                 <h2>Role:</h2>
                 <p>User </p>
                 <h2>Category :</h2>
-                <p>{getCategory(i.category)}</p>
+                <p>{i.category.name}</p>
                 {editflag == 1 && fieled === index ? (
                   <div className="drop-div">
                     <label for="matches">Choose a category:</label>

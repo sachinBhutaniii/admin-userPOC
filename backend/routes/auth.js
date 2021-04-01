@@ -25,8 +25,15 @@ const { check, validationResult } = require("express-validator");
 // });
 
 //get all users
-router.get("/all", (req, res) => {
+router.get("/all", verify, async (req, res) => {
+  //only admin can access this api
+  const role = await User.findById({ _id: req.user._id });
+  console.log(role.role);
+
+  if (!role.role == 1) return res.status(400).send("You are not an ADMIN");
+
   User.find()
+    .populate("category")
     .then(result => res.send(result))
     .catch(err => console.log(err));
 });
