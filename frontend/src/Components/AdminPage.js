@@ -14,6 +14,12 @@ const AdminPage = () => {
 
   // const [user, setUser] = useState(false);
 
+  //search
+  const [searchTerm, setSeachterm] = useState({
+    name: "",
+  });
+  const [searchResult, setSeachResult] = useState();
+
   //for new user
   const [addUser, setAddUser] = useState({
     name: "",
@@ -30,13 +36,28 @@ const AdminPage = () => {
     axios
       .get("http://localhost:8080/api/category/all")
       .then(res => {
-        console.log("Categories RECEIVED: ", res.data);
+        // console.log("Categories RECEIVED: ", res.data);
         setCategory(res.data);
       })
       .catch(err => {
         console.log("AXIOS ERROR: ", err);
       });
   }, []);
+
+  useEffect(() => {
+    console.log(searchTerm);
+
+    //search API
+    searchTerm &&
+      searchTerm.name.length > 0 &&
+      axios
+        .post("http://localhost:8080/api/admin/search", searchTerm)
+        .then(res => {
+          setSeachResult(res.data);
+          console.log("SEARCH RESULT", res);
+          //
+        });
+  }, [searchTerm.name]);
 
   const sendRequest = e => {
     e.preventDefault();
@@ -58,6 +79,7 @@ const AdminPage = () => {
           category: "",
         });
         // setData(res.data);
+        setDemo(!demo);
       })
       .catch(err => {
         // console.log("AXIOS ERROR: ", err.response.data);
@@ -82,7 +104,6 @@ const AdminPage = () => {
     setField(index);
     setEditFlag(0);
     // setUser(!user);
-    console.log("INSIDEEEEEEEEEEEE");
     axios
       .put(`http://localhost:8080/api/user/${data[index]._id}`, data[index])
       .then(res => {
@@ -163,7 +184,7 @@ const AdminPage = () => {
           setData(result.data);
         })
         .catch(err => console.log(err));
-  }, [tokenVal, userForm, demo /*, user*/]); // pass user state here for rerender
+  }, [tokenVal, userForm, demo]); // pass user state here for rerender
 
   useEffect(() => {
     //extracting name from category id
@@ -201,7 +222,17 @@ const AdminPage = () => {
   return (
     <div>
       <h1>Welcome to admin dashboard</h1>
+      <h3>Seach User</h3>
+      <input
+        type="text"
+        onChange={e => setSeachterm({ ...searchTerm, name: e.target.value })}
+      />
+      <br></br>
+      <br></br>
+      <hr></hr>
       <button onClick={() => setUserForm(true)}>ADD USER</button>
+      <br></br>
+      <br></br>
 
       {userForm ? (
         <div>
@@ -257,9 +288,75 @@ const AdminPage = () => {
         </div>
       ) : null}
 
-      {data &&
+      {/* {!searchTerm &&
+        data &&
         category &&
         data.map((i, index) => (
+          <div>
+            {console.log("Helloooooooooooooooooooooooooooooooooooooo")}
+            {i.role == 1 ? null : (
+              <div>
+                <h2>Name :</h2>
+                <p>{i.name}</p>
+                {editflag == 1 && fieled === index ? (
+                  <input
+                    type="text"
+                    placeholder={data[index].name}
+                    value={data[index].name}
+                    onChange={e => nameHandler(e, index)}
+                  />
+                ) : null}
+                <h2>Role:</h2>
+                <p>User </p>
+                <h2>Category :</h2>
+                <p>{i.category.name}</p>
+                {editflag == 1 && fieled === index ? (
+                  <div className="drop-div">
+                    <label for="matches">Choose a category:</label>
+                    <div>
+                      <select onChange={e => editCategory(e, index)}>
+                        {category &&
+                          category.map(i => (
+                            <option value={i._id}>{i.name}</option>
+                          ))}
+                      </select>
+                    </div>
+                  </div>
+                ) : null}
+                <h2>Email :</h2>
+                <p>{i.email}</p>{" "}
+                {editflag == 1 && fieled === index ? (
+                  <input
+                    type="email"
+                    placeholder={data[index].email}
+                    value={data[index].email}
+                    onChange={e => mailHandler(e, index)}
+                  />
+                ) : null}
+                <h2>DB ID :</h2>
+                <p>{i._id}</p>
+                <button onClick={() => showField(index)}>Edit</button>
+                <button onClick={() => deletedata(index)}>Delete</button>
+                <p> </p>
+                {editflag == 1 && fieled === index ? (
+                  <button onClick={() => hideField(index)}>Done</button>
+                ) : null}
+                {i.status == 1 ? (
+                  <button onClick={() => changeStatus(index)}>Deactive</button>
+                ) : (
+                  <button onClick={() => changeStatus(index)}>Activate</button>
+                )}
+                <hr></hr>
+              </div>
+            )}
+          </div>
+        ))} */}
+
+      {searchTerm &&
+      searchTerm.name.length > 0 &&
+      searchResult &&
+      searchResult.length > 0 ? (
+        searchResult.map((i, index) => (
           <div>
             {i.role == 1 ? null : (
               <div>
@@ -318,7 +415,80 @@ const AdminPage = () => {
               </div>
             )}
           </div>
-        ))}
+        ))
+      ) : searchTerm && searchTerm.name.length > 0 ? (
+        <h2>No Such User</h2>
+      ) : (
+        <div>
+          <h1>All User</h1>
+          {data &&
+            data.map((i, index) => (
+              <div>
+                {console.log("Helloooooooooooooooooooooooooooooooooooooo")}
+                {i.role == 1 ? null : (
+                  <div>
+                    <h2>Name :</h2>
+                    <p>{i.name}</p>
+                    {editflag == 1 && fieled === index ? (
+                      <input
+                        type="text"
+                        placeholder={data[index].name}
+                        value={data[index].name}
+                        onChange={e => nameHandler(e, index)}
+                      />
+                    ) : null}
+                    <h2>Role:</h2>
+                    <p>User </p>
+                    <h2>Category :</h2>
+                    <p>{i.category.name}</p>
+                    {editflag == 1 && fieled === index ? (
+                      <div className="drop-div">
+                        <label for="matches">Choose a category:</label>
+                        <div>
+                          <select onChange={e => editCategory(e, index)}>
+                            {category &&
+                              category.map(i => (
+                                <option value={i._id}>{i.name}</option>
+                              ))}
+                          </select>
+                        </div>
+                      </div>
+                    ) : null}
+                    <h2>Email :</h2>
+                    <p>{i.email}</p>{" "}
+                    {editflag == 1 && fieled === index ? (
+                      <input
+                        type="email"
+                        placeholder={data[index].email}
+                        value={data[index].email}
+                        onChange={e => mailHandler(e, index)}
+                      />
+                    ) : null}
+                    <h2>DB ID :</h2>
+                    <p>{i._id}</p>
+                    {/* <p>{i.password}</p> */}
+                    <button onClick={() => showField(index)}>Edit</button>
+                    <button onClick={() => deletedata(index)}>Delete</button>
+                    <p> </p>
+                    {editflag == 1 && fieled === index ? (
+                      <button onClick={() => hideField(index)}>Done</button>
+                    ) : null}
+                    {i.status == 1 ? (
+                      <button onClick={() => changeStatus(index)}>
+                        Deactive
+                      </button>
+                    ) : (
+                      <button onClick={() => changeStatus(index)}>
+                        Activate
+                      </button>
+                    )}
+                    <hr></hr>
+                  </div>
+                )}
+              </div>
+            ))}
+        </div>
+      )}
     </div>
   );
 };

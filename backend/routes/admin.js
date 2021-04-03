@@ -10,4 +10,16 @@ router.get("/", verify, async (req, res) => {
   else res.status(400).send("Access Denied , you are not an ADMIN");
 });
 
+router.post("/search", (req, res) => {
+  //
+  // const serachTerm = req.body.searchTerm;
+
+  const serachTerm = req.body.name;
+  // console.log("NAMEEEEE", serachTerm);
+
+  User.find({ name: { $regex: serachTerm, $options: "$i" } }).then(result =>
+    res.send(result)
+  );
+});
+
 module.exports = router;

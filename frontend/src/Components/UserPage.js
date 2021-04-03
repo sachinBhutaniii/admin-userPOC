@@ -15,6 +15,14 @@ const UserPage = () => {
     category: "",
   });
 
+  //change password
+  const [chnagePWD, setChangePWD] = useState(false); //handle inputs
+  const [currPWD, setCurrPWD] = useState({
+    oldPass: "",
+    newPass: "",
+    confirmPass: "",
+  }); //handle value
+
   useEffect(() => {
     // console.log("token value :  ", tokenVal);
     const tok = cookie.load("auth-token");
@@ -46,6 +54,7 @@ const UserPage = () => {
         .catch(err => console.log(err));
   }, [tokenVal]);
 
+  /*
   useEffect(() => {
     //extracting name from category id
     details &&
@@ -56,6 +65,29 @@ const UserPage = () => {
           setDetails({ ...details, category: result.data.name });
         });
   }, [details]);
+*/
+
+  const checkPasword = () => {
+    //check password from backend
+    setChangePWD(!chnagePWD);
+    console.log("Current Password is ", currPWD);
+
+    //verify from backend
+    currPWD &&
+      axios
+        .put(
+          `http://localhost:8080/api/user/verifypassword/${details._id}`,
+          currPWD
+        )
+        .then(result => {
+          // console.log("Data from verify password api is ", result);
+          if (result.status == 200) alert("Password Successfully Changed");
+        })
+        .catch(err => {
+          console.log(err);
+          alert(err.response.data);
+        });
+  };
 
   const editDetails = () => {
     setFlag(true);
@@ -86,7 +118,7 @@ const UserPage = () => {
 
       <div>
         <p>Role is : {details.role == 0 ? "User" : "Admin"}</p>
-        <p>Category is : {details.category}</p>
+        <p>Category is : {details.category.name}</p>
 
         <p>Name is : {details.name}</p>
         {Flag ? (
@@ -106,6 +138,50 @@ const UserPage = () => {
             value={details.email}
             onChange={e => setDetails({ ...details, email: e.target.value })}
           />
+        ) : null}
+
+        {Flag ? (
+          <div>
+            <br></br>
+            <button onClick={() => setChangePWD(!chnagePWD)}>
+              Change Password
+            </button>{" "}
+          </div>
+        ) : null}
+
+        {chnagePWD ? (
+          <div>
+            {" "}
+            <br></br>
+            <input
+              type="text"
+              placeholder="Please Enter Current Password"
+              value={currPWD.oldPass}
+              onChange={e =>
+                setCurrPWD({ ...currPWD, oldPass: e.target.value })
+              }
+            />{" "}
+            <br></br>
+            <br></br>
+            <input
+              type="text"
+              placeholder="Please Enter New  Password"
+              value={currPWD.newPass}
+              onChange={e =>
+                setCurrPWD({ ...currPWD, newPass: e.target.value })
+              }
+            />{" "}
+            <input
+              type="text"
+              placeholder="Please Confirm New  Password"
+              value={currPWD.confirmPass}
+              onChange={e =>
+                setCurrPWD({ ...currPWD, confirmPass: e.target.value })
+              }
+            />{" "}
+            <br></br>
+            <button onClick={() => checkPasword()}>Done</button>
+          </div>
         ) : null}
 
         <p>ID is : {details._id}</p>

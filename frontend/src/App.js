@@ -4,7 +4,7 @@ import axios from "axios";
 import SignUp from "./Components/SignUp";
 import Login from "./Components/Login";
 import Check from "./Components/Check";
-import { BrowserRouter, Route, Switch } from "react-router-dom";
+import { BrowserRouter, Redirect, Route, Switch } from "react-router-dom";
 import Home from "./Components/Home";
 import AdminPage from "./Components/AdminPage";
 import UserPage from "./Components/UserPage";
@@ -15,14 +15,15 @@ import ErrorPage from "./Components/ErrorPage";
 function App() {
   const [cookiePresent, setCookiePresent] = useState();
   const [flag, setFlag] = useState(false);
+  const [flag2, setFlag2] = useState();
+
+  
 
   useEffect(() => {
-    setCookiePresent(
-      document.cookie,
-      console.log("Value of cookie in app js ", cookiePresent)
-    );
-    console.log("Cookie Appjs");
-    if (document.cookie) setFlag(true);
+    setCookiePresent(document.cookie);
+    if (document.cookie){ setFlag2(true)
+    setFlag(true)}
+    
   }, [flag]);
 
   /*
@@ -58,6 +59,7 @@ function App() {
               render={() => <Login flag={flag} setFlag={setFlag} />}
             />
 
+            {/* 
             <Route
               exact
               path="/adminpage"
@@ -68,10 +70,11 @@ function App() {
               exact
               path="/userpage"
               render={props => (flag ? <UserPage /> : <h1>Login First</h1>)}
-            />
+            /> */}
 
             <Route path="*" component={ErrorPage} />
           </Switch>
+          {/* {!flag && flag2 && flag2==false && <Redirect to="/login" />} */}
         </BrowserRouter>
       </>
     </div>

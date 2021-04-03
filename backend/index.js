@@ -50,6 +50,8 @@ mongoose
             { name: "Scientist" },
           ]);
         }
+
+        // DB.collection("users").createIndex({ name: "text" }); //creating index for searching
       });
 
     //inserting admin if doesnt exist

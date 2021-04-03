@@ -2,7 +2,8 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import cookie from "react-cookies";
 import { Redirect } from "react-router-dom";
-
+import AdminPage from "./AdminPage";
+import UserPage from "./UserPage";
 const Check = () => {
   const [flag, setFlag] = useState("");
   const [tokenVal, setTokenVal] = useState("");
@@ -27,7 +28,8 @@ const Check = () => {
         setFlag(res.data);
       })
       .catch(err => {
-        setInavlid(err.response.data);
+        //        setInavlid(err.response.data);
+        console.log(err);
       });
   });
 
@@ -37,12 +39,12 @@ const Check = () => {
 
   return (
     <div>
-      <h1>Check</h1>
-
       {flag == "1" ? (
-        <Redirect to="/adminpage" />
+        // <Redirect to="/adminpage" />
+        <AdminPage />
       ) : flag == "0" ? (
-        <Redirect to="/userpage" />
+        // <Redirect to="/userpage" />
+        <UserPage />
       ) : invalid && flag ? (
         <h1>Access Denied</h1>
       ) : (

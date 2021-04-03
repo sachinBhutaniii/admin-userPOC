@@ -7,10 +7,14 @@ const User = require("../model/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const verify = require("./verifyToken");
+const dotenv = require("dotenv");
+
+const nodemailer = require("nodemailer");
 
 // //for cookies
 // var cookieParser = require("cookie-parser");
 // app.use(cookieParser());
+dotenv.config();
 
 //express validator
 const { check, validationResult } = require("express-validator");
@@ -152,9 +156,72 @@ router.post(
 //get a single user
 router.get("/:id", (req, res) => {
   User.findById(req.params.id)
+    .populate("category")
     .then(result => res.send(result))
     .catch(err => res.status(400).send(err));
 });
+
+//verify password
+router.put(
+  "/verifypassword/:id",
+  [
+    check("newPass", "Inavlid Password")
+      .not()
+      .isEmpty()
+      .isLength({ min: 6, max: 1024 }),
+    check("oldPass", "Inavlid Password")
+      .not()
+      .isEmpty()
+      .isLength({ min: 6, max: 1024 }),
+    check("confirmPass", "Inavlid Password")
+      .not()
+      .isEmpty()
+      .isLength({ min: 6, max: 1024 }),
+  ],
+  async (req, res) => {
+    console.log("Verify password called");
+
+    //we get req.user from verify middleware
+    // User.findById(req.params.id)
+    //   .populate("category")
+    //   .then(result => res.send(result))
+    //   .catch(err => err.status(400).send(err));
+    //get user info and check password with current password
+
+    const userdetails = await User.findById(req.params.id);
+    console.log(userdetails);
+
+    const validPass = await bcrypt.compare(
+      req.body.oldPass,
+      userdetails.password
+    );
+
+    if (!validPass)
+      return res.status(400).send("Please Enter Correct Current Password");
+
+    //console.log(req.body.oldPass);
+    console.log(req.body.newPass);
+    console.log(req.body.confirmPass);
+
+    //compare both new passwords
+    if (req.body.newPass !== req.body.confirmPass)
+      res.status(400).send("Passwords Do Not Match");
+
+    const salt = await bcrypt.genSalt(10);
+    const hashPassword = await bcrypt.hash(req.body.newPass, salt);
+
+    User.updateOne(
+      { _id: req.params.id },
+      {
+        $set: {
+          password: hashPassword,
+        },
+      }
+    )
+      .then(result => res.send(result))
+      .catch(err => res.send(err));
+  }
+);
 
 //update
 router.put(
@@ -223,4 +290,95 @@ router.put(
   }
 );
 
+// forget passowrd
+/*
+router.post("/forgetpassword", (req, res) => {
+  if (req.body.email === "") {
+    res.status(400).send("Email Required");
+  }
+
+  User.findOne({ email: req.body.email }).then(result => {
+    if (result === null) {
+      res.status(403).send("Email Not In DB");
+    } else {
+      // res.send(result);
+      //send mail
+
+      //account sending the mail
+      const transporter = nodemailer.createTransport({
+        service: "smtp.ethereal.email",
+        auth: {
+          user: "cielo.torphy@ethereal.email",
+          pass: `GaUFa8pFy3gwern98B`,
+        },
+      });
+
+      const mailoptions = {
+        from: "no-reply@nodemailer.com",
+        to: `${req.body.email}`,
+        subject: "link to reset",
+        text:
+          `Click on the link below to reset your password \n ` +
+          `http://localhost:3000/resetpassword`,
+        http: `<a href="http://localhost:3000/resetpassword" >Click Here</a>`,
+      };
+
+      transporter.sendMail(mailoptions, (err, response) => {
+        if (err) {
+          res.send("There was an error while sending mail");
+        } else {
+          console.log(response);
+          res.status(200).send("Recovery Email sent ");
+        }
+      });
+
+      //else close
+    }
+  });
+});
+*/
+
+router.post("/forgetpassword", (req, res) => {
+  // async..await is not allowed in global scope, must use a wrapper
+
+  if (req.body.email === "") {
+    res.status(400).send("Email Required");
+  }
+
+  User.findOne({ email: req.body.email }).then(result => {
+    if (result === null) {
+      res.status(403).send("Email Not In DB");
+    } else {
+      // res.send(result);
+
+      var transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+          // user: `${process.env.EMAIL_ADDRESS}`,
+          // pass: `${process.env.PASSWORD}`,
+          //error if you use .env file
+          //write email id and pass here
+        },
+      });
+
+      var mailOptions = {
+        from: `admin@nodemail.com`,
+        to: `${req.body.email}`,
+        subject: "Sending Email using Node.js",
+        html: ` <h1>Hello </h1>
+         <a href="http://localhost:3000/login">Forget Password</a>`,
+      };
+
+      transporter.sendMail(mailOptions, function (error, info) {
+        if (error) {
+          console.log(error);
+          res.send(error);
+        } else {
+          console.log("Email sent: " + info.response);
+          res.send("Email sent");
+        }
+      });
+    }
+  });
+});
 module.exports = router;

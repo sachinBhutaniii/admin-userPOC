@@ -19,6 +19,7 @@ const Login = ({ flag, setFlag }) => {
         // console.log("RESPONSE RECEIVED: ", res);
         // console.log("RESPONSE", res.status);
         if (res.status == 200) {
+          setFlag(true);
           setRedirect(true);
         }
       })
@@ -26,8 +27,6 @@ const Login = ({ flag, setFlag }) => {
         console.log("AXIOS ERROR: ", err);
         alert(err.response.data);
       });
-
-    setFlag(true);
   };
 
   return (
