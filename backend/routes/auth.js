@@ -8,9 +8,9 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const verify = require("./verifyToken");
 const dotenv = require("dotenv");
-
 const nodemailer = require("nodemailer");
 
+const crypto = require('crypto')
 // //for cookies
 // var cookieParser = require("cookie-parser");
 // app.use(cookieParser());
@@ -41,6 +41,37 @@ router.get("/all", verify, async (req, res) => {
     .then(result => res.send(result))
     .catch(err => console.log(err));
 });
+
+
+
+
+//updating old password
+router.put("/resetPassword", async(req,res)=>{
+  const newPassword = req.body.password;
+  const sentToken = req.body.token;
+
+  console.log("Reset Password called");
+  
+  User.findOne({resetToken:sentToken , expireToken:{$gt:Date.now()}})
+  .then(user => {
+    if(!user)
+    return res.status(422).send("Try Again Session Expired")
+
+
+    bcrypt.hash(newPassword, 10).then(hashPassword => {
+      
+            user.password = hashPassword;
+            user.resetToken = undefined;
+            user.expireToken = undefined;
+
+            user.save().then((savedUser)=>{
+              res.send("Password Successfully updated")
+            })
+            .catch(err => console.log(err))
+    })
+  })
+})
+
 
 router.post(
   "/login",
@@ -339,46 +370,65 @@ router.post("/forgetpassword", (req, res) => {
 */
 
 router.post("/forgetpassword", (req, res) => {
-  // async..await is not allowed in global scope, must use a wrapper
 
-  if (req.body.email === "") {
-    res.status(400).send("Email Required");
-  }
-
-  User.findOne({ email: req.body.email }).then(result => {
-    if (result === null) {
-      res.status(403).send("Email Not In DB");
-    } else {
-      // res.send(result);
-
-      var transporter = nodemailer.createTransport({
-        service: "gmail",
-        auth: {
-          // user: `${process.env.EMAIL_ADDRESS}`,
-          // pass: `${process.env.PASSWORD}`,
-          //error if you use .env file
-          //write email id and pass here
-        },
-      });
-
-      var mailOptions = {
-        from: `admin@nodemail.com`,
-        to: `${req.body.email}`,
-        subject: "Sending Email using Node.js",
-        html: ` <h1>Hello </h1>
-         <a href="http://localhost:3000/login">Forget Password</a>`,
-      };
-
-      transporter.sendMail(mailOptions, function (error, info) {
-        if (error) {
-          console.log(error);
-          res.send(error);
-        } else {
-          console.log("Email sent: " + info.response);
-          res.send("Email sent");
-        }
-      });
+  crypto.randomBytes(32,(err,buffer)=>{
+    if(err){
+      console.log(err)
     }
-  });
+
+    const token = buffer.toString("hex");
+
+    if (req.body.email === "") {
+      res.status(400).send("Email Required");
+    }
+  
+    User.findOne({ email: req.body.email }).then(result => {
+      if (result === null) {
+        res.status(403).send("Email Not In DB");
+      } else {
+        //result store the entire user object
+        // console.log("RESULTS OF FORGOT", result)
+  
+        result.resetToken = token;
+        result.expireToken = Date.now() + 3600000; //expires after 1 hour ie usercant reset pass after 1 hout
+        result.save().then(result => {
+          //
+          var transporter = nodemailer.createTransport({
+            service: "gmail",
+            auth: {
+              
+              //write email id and pass here
+              
+              // user : process.env.EMAIL_ADDRESS,
+              // pass : process.env.PASSWORD
+            },
+          });
+
+
+          var mailOptions = {
+            from: `admin@nodemail.com`,
+            to: `${req.body.email}`,
+            subject: "Sending Email using Node.js",
+            html: ` <h1>Hello </h1>
+             <a href="http://localhost:3000/resetpassword${token}">Forgot Password</a>`,
+          };
+
+          transporter.sendMail(mailOptions, function (error, info) {
+            if (error) {
+              console.log(error);
+              res.send(error);
+            } else {
+              console.log("Email sent: " + info.response);
+              res.send("Email sent");
+            }
+          });
+    
+        })
+      }
+    });
+  })
 });
+
+
+
 module.exports = router;

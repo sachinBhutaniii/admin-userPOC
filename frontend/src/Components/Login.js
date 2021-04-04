@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import cookie from "react-cookies";
-import { Redirect } from "react-router-dom";
+import { Redirect, useHistory } from "react-router-dom";
 
 const Login = ({ flag, setFlag }) => {
   const [redirect, setRedirect] = useState();
@@ -9,6 +9,8 @@ const Login = ({ flag, setFlag }) => {
     email: "",
     password: "",
   });
+
+  let history = useHistory();
 
   const sendRequest = e => {
     e.preventDefault();
@@ -28,6 +30,11 @@ const Login = ({ flag, setFlag }) => {
         alert(err.response.data);
       });
   };
+
+  const forgotPage = () => {
+    history.push("/forgot");
+    
+  }
 
   return (
     <div>
@@ -56,6 +63,7 @@ const Login = ({ flag, setFlag }) => {
           <button type="submit">Login</button>
           <br />
         </form>
+        <button onClick={()=>forgotPage()}  >Forgot Password</button>
         {redirect ? <Redirect to="/dashboard" /> : null}
       </div>
     </div>

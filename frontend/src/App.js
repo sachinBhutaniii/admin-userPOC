@@ -11,6 +11,8 @@ import UserPage from "./Components/UserPage";
 import Navbar from "./Components/Navbar";
 import cookie from "react-cookies";
 import ErrorPage from "./Components/ErrorPage";
+import ForgotPasswordPage from "./Components/ForgotPasswordPage";
+import ResetPassword from "./Components/ResetPassword";
 
 function App() {
   const [cookiePresent, setCookiePresent] = useState();
@@ -48,6 +50,9 @@ function App() {
 
           <Switch>
             <Route exact path="/" component={Home} />
+            <Route exact path="/forgot" component={ForgotPasswordPage} />
+            <Route exact path="/resetpassword:token" component={ResetPassword} />
+
             {/* <Route exact path="/login" component={Login} /> */}
             <Route exact path="/dashboard" component={Check} />
             {/* <Route exact path="/adminpage" component={AdminPage} /> */}

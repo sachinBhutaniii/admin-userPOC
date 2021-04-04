@@ -40,6 +40,10 @@ const userSchema = new mongoose.Schema({
     type: Number,
     default: 0,
   },
+
+  resetToken:String,
+  expireToken : String,
+
   status:{
     type:Number,
     default:1 //active
