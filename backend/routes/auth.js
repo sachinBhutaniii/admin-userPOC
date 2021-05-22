@@ -10,7 +10,7 @@ const verify = require("./verifyToken");
 const dotenv = require("dotenv");
 const nodemailer = require("nodemailer");
 
-const crypto = require('crypto')
+const crypto = require("crypto");
 // //for cookies
 // var cookieParser = require("cookie-parser");
 // app.use(cookieParser());
@@ -36,42 +36,40 @@ router.get("/all", verify, async (req, res) => {
 
   if (!role.role == 1) return res.status(400).send("You are not an ADMIN");
 
-  User.find()
+  //ne -> where role is not equal to 1
+  User.find({ role: { $ne: 1 } })
     .populate("category")
-    .then(result => res.send(result))
-    .catch(err => console.log(err));
+    .then((result) => res.send(result))
+    .catch((err) => console.log(err));
 });
 
-
-
-
 //updating old password
-router.put("/resetPassword", async(req,res)=>{
+router.put("/resetPassword", async (req, res) => {
   const newPassword = req.body.password;
   const sentToken = req.body.token;
 
   console.log("Reset Password called");
-  
-  User.findOne({resetToken:sentToken , expireToken:{$gt:Date.now()}})
-  .then(user => {
-    if(!user)
-    return res.status(422).send("Try Again Session Expired")
 
+  User.findOne({
+    resetToken: sentToken,
+    expireToken: { $gt: Date.now() },
+  }).then((user) => {
+    if (!user) return res.status(422).send("Try Again Session Expired");
 
-    bcrypt.hash(newPassword, 10).then(hashPassword => {
-      
-            user.password = hashPassword;
-            user.resetToken = undefined;
-            user.expireToken = undefined;
+    bcrypt.hash(newPassword, 10).then((hashPassword) => {
+      user.password = hashPassword;
+      user.resetToken = undefined;
+      user.expireToken = undefined;
 
-            user.save().then((savedUser)=>{
-              res.send("Password Successfully updated")
-            })
-            .catch(err => console.log(err))
-    })
-  })
-})
-
+      user
+        .save()
+        .then((savedUser) => {
+          res.send("Password Successfully updated");
+        })
+        .catch((err) => console.log(err));
+    });
+  });
+});
 
 router.post(
   "/login",
@@ -118,8 +116,8 @@ router.post(
 //delete
 router.delete("/:id", (req, res) => {
   User.remove({ _id: req.params.id })
-    .then(result => res.send(result))
-    .catch(err => res.send(err));
+    .then((result) => res.send(result))
+    .catch((err) => res.send(err));
 });
 
 router.post(
@@ -179,8 +177,8 @@ router.post(
     });
     user
       .save()
-      .then(result => res.send(result))
-      .catch(err => res.status(404).send(err));
+      .then((result) => res.send(result))
+      .catch((err) => res.status(404).send(err));
   }
 );
 
@@ -188,8 +186,8 @@ router.post(
 router.get("/:id", (req, res) => {
   User.findById(req.params.id)
     .populate("category")
-    .then(result => res.send(result))
-    .catch(err => res.status(400).send(err));
+    .then((result) => res.send(result))
+    .catch((err) => res.status(400).send(err));
 });
 
 //verify password
@@ -249,8 +247,8 @@ router.put(
         },
       }
     )
-      .then(result => res.send(result))
-      .catch(err => res.send(err));
+      .then((result) => res.send(result))
+      .catch((err) => res.send(err));
   }
 );
 
@@ -299,8 +297,8 @@ router.put(
           },
         }
       )
-        .then(result => res.send(result))
-        .catch(err => res.send(err));
+        .then((result) => res.send(result))
+        .catch((err) => res.send(err));
     } else if (!emailExists) {
       User.updateOne(
         { _id: req.params.id },
@@ -313,8 +311,8 @@ router.put(
           },
         }
       )
-        .then(result => res.send(result))
-        .catch(err => res.send(err));
+        .then((result) => res.send(result))
+        .catch((err) => res.send(err));
     } else {
       res.status(400).send("email already exists");
     }
@@ -370,10 +368,9 @@ router.post("/forgetpassword", (req, res) => {
 */
 
 router.post("/forgetpassword", (req, res) => {
-
-  crypto.randomBytes(32,(err,buffer)=>{
-    if(err){
-      console.log(err)
+  crypto.randomBytes(32, (err, buffer) => {
+    if (err) {
+      console.log(err);
     }
 
     const token = buffer.toString("hex");
@@ -381,29 +378,27 @@ router.post("/forgetpassword", (req, res) => {
     if (req.body.email === "") {
       res.status(400).send("Email Required");
     }
-  
-    User.findOne({ email: req.body.email }).then(result => {
+
+    User.findOne({ email: req.body.email }).then((result) => {
       if (result === null) {
         res.status(403).send("Email Not In DB");
       } else {
         //result store the entire user object
         // console.log("RESULTS OF FORGOT", result)
-  
+
         result.resetToken = token;
         result.expireToken = Date.now() + 3600000; //expires after 1 hour ie usercant reset pass after 1 hout
-        result.save().then(result => {
+        result.save().then((result) => {
           //
           var transporter = nodemailer.createTransport({
             service: "gmail",
             auth: {
-              
               //write email id and pass here
-              
-              // user : process.env.EMAIL_ADDRESS,
-              // pass : process.env.PASSWORD
+
+              user: process.env.EMAIL_ADDRESS,
+              pass: process.env.PASSWORD,
             },
           });
-
 
           var mailOptions = {
             from: `admin@nodemail.com`,
@@ -422,13 +417,10 @@ router.post("/forgetpassword", (req, res) => {
               res.send("Email sent");
             }
           });
-    
-        })
+        });
       }
     });
-  })
+  });
 });
-
-
 
 module.exports = router;

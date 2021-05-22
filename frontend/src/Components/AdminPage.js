@@ -1,6 +1,8 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import cookie from "react-cookies";
+import { Button, Card } from "react-bootstrap";
+import "bootstrap/dist/css/bootstrap.min.css";
 
 const AdminPage = () => {
   const [data, setData] = useState();
@@ -35,11 +37,11 @@ const AdminPage = () => {
   useEffect(() => {
     axios
       .get("http://localhost:8080/api/category/all")
-      .then(res => {
+      .then((res) => {
         // console.log("Categories RECEIVED: ", res.data);
         setCategory(res.data);
       })
-      .catch(err => {
+      .catch((err) => {
         console.log("AXIOS ERROR: ", err);
       });
   }, []);
@@ -52,14 +54,14 @@ const AdminPage = () => {
       searchTerm.name.length > 0 &&
       axios
         .post("http://localhost:8080/api/admin/search", searchTerm)
-        .then(res => {
+        .then((res) => {
           setSeachResult(res.data);
           console.log("SEARCH RESULT", res);
           //
         });
   }, [searchTerm.name]);
 
-  const sendRequest = e => {
+  const sendRequest = (e) => {
     e.preventDefault();
     // setUserForm(true);
 
@@ -67,7 +69,7 @@ const AdminPage = () => {
 
     axios
       .post("http://localhost:8080/api/user/register", addUser)
-      .then(res => {
+      .then((res) => {
         console.log("RESPONSE RECEIVED:  after register", res);
         console.log("RESPONSE", res.status);
         alert("User added successfully successfully ");
@@ -81,7 +83,7 @@ const AdminPage = () => {
         // setData(res.data);
         setDemo(!demo);
       })
-      .catch(err => {
+      .catch((err) => {
         // console.log("AXIOS ERROR: ", err.response.data);
         alert(err.message);
       });
@@ -89,30 +91,30 @@ const AdminPage = () => {
     //redirecting
   };
 
-  const handleDropdown = e => {
+  const handleDropdown = (e) => {
     console.log("Selected value", e.target.value);
     // setSelectedCategory(e.target.value);
     setAddUser({ ...addUser, category: e.target.value });
   };
 
-  const showField = index => {
+  const showField = (index) => {
     setField(index);
     setEditFlag(1);
   };
 
-  const hideField = index => {
+  const hideField = (index) => {
     setField(index);
     setEditFlag(0);
     // setUser(!user);
     axios
       .put(`http://localhost:8080/api/user/${data[index]._id}`, data[index])
-      .then(res => {
+      .then((res) => {
         console.log("RESPONSE of put request: ", res);
         console.log("RESPONSE", res.status);
         alert("Successfullt added");
         setDemo(!demo);
       })
-      .catch(err => {
+      .catch((err) => {
         alert(err.response.data);
         setDemo(!demo);
       });
@@ -148,18 +150,18 @@ const AdminPage = () => {
   //   return categ[0].name; //filter returns an object
   // };
 
-  const deletedata = index => {
+  const deletedata = (index) => {
     // console.log(data[index]._id);
 
     axios
       .delete(`http://localhost:8080/api/user/${data[index]._id}`)
-      .then(res => {
+      .then((res) => {
         // console.log("RESPONSE of put request: ", res);
         // setData(res.data);
         console.log("RESPONSE of delte", res);
         setDemo(!demo);
       })
-      .catch(err => {
+      .catch((err) => {
         console.log("AXIOS ERROR: ", err);
       });
   };
@@ -179,11 +181,11 @@ const AdminPage = () => {
             },
           }
         )
-        .then(result => {
+        .then((result) => {
           // console.log("Extracted data is ", result);
           setData(result.data);
         })
-        .catch(err => console.log(err));
+        .catch((err) => console.log(err));
   }, [tokenVal, userForm, demo]); // pass user state here for rerender
 
   useEffect(() => {
@@ -192,13 +194,13 @@ const AdminPage = () => {
       data.category &&
       axios
         .get(`http://localhost:8080/api/category/${data.category}`)
-        .then(result => {
+        .then((result) => {
           console.log("Category ", result);
           setData({ ...data, category: result.data.name });
         });
   });
 
-  const changeStatus = index => {
+  const changeStatus = (index) => {
     //
     console.log("Account to be changed ", data[index]);
 
@@ -207,12 +209,12 @@ const AdminPage = () => {
 
     axios
       .put(`http://localhost:8080/api/user/${data[index]._id}`, data[index])
-      .then(res => {
+      .then((res) => {
         console.log("RESPONSE of put request: ", res);
         console.log("RESPONSE", res.status);
         setDemo(!demo);
       })
-      .catch(err => {
+      .catch((err) => {
         console.log("AXIOS ERROR: ", err);
         alert(err);
         setDemo(!demo);
@@ -222,15 +224,17 @@ const AdminPage = () => {
   return (
     <div>
       <h1>Welcome to admin dashboard</h1>
-      <h3>Seach User</h3>
+      <h3 style={{ color: "grey" }}>Search Users</h3>
       <input
         type="text"
-        onChange={e => setSeachterm({ ...searchTerm, name: e.target.value })}
+        onChange={(e) => setSeachterm({ ...searchTerm, name: e.target.value })}
       />
       <br></br>
       <br></br>
       <hr></hr>
-      <button onClick={() => setUserForm(true)}>ADD USER</button>
+      <Button variant="dark" onClick={() => setUserForm(true)}>
+        ADD USER
+      </Button>
       <br></br>
       <br></br>
 
@@ -239,9 +243,9 @@ const AdminPage = () => {
           <div className="drop-div">
             <label for="matches">Choose a category:</label>
             <div>
-              <select className="category" onChange={e => handleDropdown(e)}>
+              <select className="category" onChange={(e) => handleDropdown(e)}>
                 {category &&
-                  category.map(i => <option value={i._id}>{i.name}</option>)}
+                  category.map((i) => <option value={i._id}>{i.name}</option>)}
               </select>
             </div>
           </div>
@@ -255,7 +259,9 @@ const AdminPage = () => {
                 type="text"
                 name="name"
                 value={addUser.name}
-                onChange={e => setAddUser({ ...addUser, name: e.target.value })}
+                onChange={(e) =>
+                  setAddUser({ ...addUser, name: e.target.value })
+                }
               />
               <br />
               Email :
@@ -264,7 +270,7 @@ const AdminPage = () => {
                 type="email"
                 name="email"
                 value={addUser.email}
-                onChange={e =>
+                onChange={(e) =>
                   setAddUser({ ...addUser, email: e.target.value })
                 }
               />
@@ -275,13 +281,15 @@ const AdminPage = () => {
                 type="text"
                 name="password"
                 value={addUser.password}
-                onChange={e =>
+                onChange={(e) =>
                   setAddUser({ ...addUser, password: e.target.value })
                 }
               />
               <br />
               <br />
-              <button type="submit">Done</button>
+              <Button variant="info" type="submit">
+                Done
+              </Button>
               <br />
             </form>
           </div>
@@ -357,134 +365,207 @@ const AdminPage = () => {
       searchResult &&
       searchResult.length > 0 ? (
         searchResult.map((i, index) => (
-          <div>
-            {i.role == 1 ? null : (
+          <div className="box">
+            <Card
+              border="dark"
+              style={{
+                width: "40rem",
+                // marginLeft: "450px",
+                marginBottom: "15px",
+                backgroundColor: "#DEDBDB",
+              }}
+            >
               <div>
-                <h2>Name :</h2>
-                <p>{i.name}</p>
-                {editflag == 1 && fieled === index ? (
-                  <input
-                    type="text"
-                    placeholder={data[index].name}
-                    value={data[index].name}
-                    onChange={e => nameHandler(e, index)}
-                  />
-                ) : null}
-                <h2>Role:</h2>
-                <p>User </p>
-                <h2>Category :</h2>
-                <p>{i.category.name}</p>
-                {editflag == 1 && fieled === index ? (
-                  <div className="drop-div">
-                    <label for="matches">Choose a category:</label>
+                <Card.Body>
+                  {i.role == 1 ? null : (
                     <div>
-                      <select onChange={e => editCategory(e, index)}>
-                        {category &&
-                          category.map(i => (
-                            <option value={i._id}>{i.name}</option>
-                          ))}
-                      </select>
+                      <h2>Name :</h2>
+                      <p>{i.name}</p>
+                      {editflag == 1 && fieled === index ? (
+                        <input
+                          type="text"
+                          placeholder={data[index].name}
+                          value={data[index].name}
+                          onChange={(e) => nameHandler(e, index)}
+                        />
+                      ) : null}
+                      <h2>Role:</h2>
+                      <p>User </p>
+                      <h2>Category :</h2>
+                      <p>{i.category.name}</p>
+                      {editflag == 1 && fieled === index ? (
+                        <div className="drop-div">
+                          <label for="matches">Choose a category:</label>
+                          <div>
+                            <select onChange={(e) => editCategory(e, index)}>
+                              {category &&
+                                category.map((i) => (
+                                  <option value={i._id}>{i.name}</option>
+                                ))}
+                            </select>
+                          </div>
+                        </div>
+                      ) : null}
+                      <h2>Email :</h2>
+                      <p>{i.email}</p>{" "}
+                      {editflag == 1 && fieled === index ? (
+                        <input
+                          type="email"
+                          placeholder={data[index].email}
+                          value={data[index].email}
+                          onChange={(e) => mailHandler(e, index)}
+                        />
+                      ) : null}
+                      <h2>DB ID :</h2>
+                      <p>{i._id}</p>
+                      {/* <p>{i.password}</p> */}
+                      <Button
+                        variant="secondary"
+                        style={{ marginRight: "4px" }}
+                        onClick={() => showField(index)}
+                      >
+                        Edit
+                      </Button>
+                      <Button
+                        variant="warning"
+                        onClick={() => deletedata(index)}
+                      >
+                        Delete
+                      </Button>
+                      <p> </p>
+                      {editflag == 1 && fieled === index ? (
+                        <Button
+                          style={{ marginRight: "4px" }}
+                          onClick={() => hideField(index)}
+                        >
+                          Done
+                        </Button>
+                      ) : null}
+                      {i.status == 1 ? (
+                        <Button
+                          variant="danger"
+                          onClick={() => changeStatus(index)}
+                        >
+                          Deactive
+                        </Button>
+                      ) : (
+                        <Button
+                          variant="danger"
+                          onClick={() => changeStatus(index)}
+                        >
+                          Activate
+                        </Button>
+                      )}
+                      <hr></hr>
                     </div>
-                  </div>
-                ) : null}
-                <h2>Email :</h2>
-                <p>{i.email}</p>{" "}
-                {editflag == 1 && fieled === index ? (
-                  <input
-                    type="email"
-                    placeholder={data[index].email}
-                    value={data[index].email}
-                    onChange={e => mailHandler(e, index)}
-                  />
-                ) : null}
-                <h2>DB ID :</h2>
-                <p>{i._id}</p>
-                {/* <p>{i.password}</p> */}
-                <button onClick={() => showField(index)}>Edit</button>
-                <button onClick={() => deletedata(index)}>Delete</button>
-                <p> </p>
-                {editflag == 1 && fieled === index ? (
-                  <button onClick={() => hideField(index)}>Done</button>
-                ) : null}
-                {i.status == 1 ? (
-                  <button onClick={() => changeStatus(index)}>Deactive</button>
-                ) : (
-                  <button onClick={() => changeStatus(index)}>Activate</button>
-                )}
-                <hr></hr>
+                  )}
+                </Card.Body>
               </div>
-            )}
+            </Card>
           </div>
         ))
       ) : searchTerm && searchTerm.name.length > 0 ? (
-        <h2>No Such User</h2>
+        <h2 style={{ color: "red" }}>No Such User</h2>
       ) : (
         <div>
           <h1>All User</h1>
           {data &&
             data.map((i, index) => (
-              <div>
-                {console.log("Helloooooooooooooooooooooooooooooooooooooo")}
-                {i.role == 1 ? null : (
-                  <div>
-                    <h2>Name :</h2>
-                    <p>{i.name}</p>
-                    {editflag == 1 && fieled === index ? (
-                      <input
-                        type="text"
-                        placeholder={data[index].name}
-                        value={data[index].name}
-                        onChange={e => nameHandler(e, index)}
-                      />
-                    ) : null}
-                    <h2>Role:</h2>
-                    <p>User </p>
-                    <h2>Category :</h2>
-                    <p>{i.category.name}</p>
-                    {editflag == 1 && fieled === index ? (
-                      <div className="drop-div">
-                        <label for="matches">Choose a category:</label>
-                        <div>
-                          <select onChange={e => editCategory(e, index)}>
-                            {category &&
-                              category.map(i => (
-                                <option value={i._id}>{i.name}</option>
-                              ))}
-                          </select>
-                        </div>
+              <div className="box">
+                <Card
+                  border="dark"
+                  style={{
+                    width: "40rem",
+                    // marginLeft: "450px",
+                    marginBottom: "15px",
+                    backgroundColor: "#DEDBDB",
+                  }}
+                >
+                  <Card.Body>
+                    {i.role == 1 ? null : (
+                      <div>
+                        <h2>Name :</h2>
+                        <p>{i.name}</p>
+                        {editflag == 1 && fieled === index ? (
+                          <input
+                            type="text"
+                            placeholder={data[index].name}
+                            value={data[index].name}
+                            onChange={(e) => nameHandler(e, index)}
+                          />
+                        ) : null}
+                        <h2>Role:</h2>
+                        <p>User </p>
+                        <h2>Category :</h2>
+                        <p>{i.category.name}</p>
+                        {editflag == 1 && fieled === index ? (
+                          <div className="drop-div">
+                            <label for="matches">Choose a category:</label>
+                            <div>
+                              <select onChange={(e) => editCategory(e, index)}>
+                                {category &&
+                                  category.map((i) => (
+                                    <option value={i._id}>{i.name}</option>
+                                  ))}
+                              </select>
+                            </div>
+                          </div>
+                        ) : null}
+                        <h2>Email :</h2>
+                        <p>{i.email}</p>{" "}
+                        {editflag == 1 && fieled === index ? (
+                          <input
+                            type="email"
+                            placeholder={data[index].email}
+                            value={data[index].email}
+                            onChange={(e) => mailHandler(e, index)}
+                          />
+                        ) : null}
+                        <h2>DB ID :</h2>
+                        <p>{i._id}</p>
+                        {/* <p>{i.password}</p> */}
+                        <Button
+                          variant="secondary"
+                          onClick={() => showField(index)}
+                          style={{ marginRight: "4px" }}
+                        >
+                          Edit
+                        </Button>
+                        <Button
+                          variant="warning"
+                          onClick={() => deletedata(index)}
+                        >
+                          Delete
+                        </Button>
+                        <p> </p>
+                        {editflag == 1 && fieled === index ? (
+                          <Button
+                            style={{ marginRight: "4px" }}
+                            onClick={() => hideField(index)}
+                          >
+                            Done
+                          </Button>
+                        ) : null}
+                        {i.status == 1 ? (
+                          <Button
+                            variant="danger"
+                            onClick={() => changeStatus(index)}
+                          >
+                            Deactive
+                          </Button>
+                        ) : (
+                          <Button
+                            variant="danger"
+                            onClick={() => changeStatus(index)}
+                          >
+                            Activate
+                          </Button>
+                        )}
+                        <hr></hr>
                       </div>
-                    ) : null}
-                    <h2>Email :</h2>
-                    <p>{i.email}</p>{" "}
-                    {editflag == 1 && fieled === index ? (
-                      <input
-                        type="email"
-                        placeholder={data[index].email}
-                        value={data[index].email}
-                        onChange={e => mailHandler(e, index)}
-                      />
-                    ) : null}
-                    <h2>DB ID :</h2>
-                    <p>{i._id}</p>
-                    {/* <p>{i.password}</p> */}
-                    <button onClick={() => showField(index)}>Edit</button>
-                    <button onClick={() => deletedata(index)}>Delete</button>
-                    <p> </p>
-                    {editflag == 1 && fieled === index ? (
-                      <button onClick={() => hideField(index)}>Done</button>
-                    ) : null}
-                    {i.status == 1 ? (
-                      <button onClick={() => changeStatus(index)}>
-                        Deactive
-                      </button>
-                    ) : (
-                      <button onClick={() => changeStatus(index)}>
-                        Activate
-                      </button>
                     )}
-                    <hr></hr>
-                  </div>
-                )}
+                  </Card.Body>
+                </Card>
               </div>
             ))}
         </div>

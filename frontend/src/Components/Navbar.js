@@ -2,6 +2,9 @@ import React, { useEffect, useState } from "react";
 import { Link, Redirect, useHistory } from "react-router-dom";
 import "./custom.css";
 import cookie from "react-cookies";
+import { Button } from "react-bootstrap";
+import "bootstrap/dist/css/bootstrap.min.css";
+
 const Navbar = ({ setCookiePresent, cookiePresent, flag, setFlag }) => {
   const [isRedirect, setIsRedirect] = useState();
   let history = useHistory();
@@ -26,16 +29,22 @@ const Navbar = ({ setCookiePresent, cookiePresent, flag, setFlag }) => {
       <nav>
         <ul>
           <li>
-            <Link to="/"> Home </Link>
+            <Button variant="outline-primary">
+              <Link to="/"> Home </Link>
+            </Button>
           </li>
 
           {flag ? (
             <li>
-              <button onClick={clearCookie1}>Logout</button>
+              <Button variant="danger" onClick={clearCookie1}>
+                Logout
+              </Button>
             </li>
           ) : (
             <li>
-              <Link to="/login"> Login </Link>
+              <Button variant="outline-secondary">
+                <Link to="/login"> Login </Link>
+              </Button>
             </li>
           )}
         </ul>

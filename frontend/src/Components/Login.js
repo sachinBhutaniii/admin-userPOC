@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import cookie from "react-cookies";
 import { Redirect, useHistory } from "react-router-dom";
+import { Button } from "react-bootstrap";
+import "bootstrap/dist/css/bootstrap.min.css";
 
 const Login = ({ flag, setFlag }) => {
   const [redirect, setRedirect] = useState();
@@ -12,11 +14,11 @@ const Login = ({ flag, setFlag }) => {
 
   let history = useHistory();
 
-  const sendRequest = e => {
+  const sendRequest = (e) => {
     e.preventDefault();
     axios
       .post("http://localhost:8080/api/user/login", data)
-      .then(res => {
+      .then((res) => {
         cookie.save("auth-token", res.data);
         // console.log("RESPONSE RECEIVED: ", res);
         // console.log("RESPONSE", res.status);
@@ -25,7 +27,7 @@ const Login = ({ flag, setFlag }) => {
           setRedirect(true);
         }
       })
-      .catch(err => {
+      .catch((err) => {
         console.log("AXIOS ERROR: ", err);
         alert(err.response.data);
       });
@@ -33,8 +35,7 @@ const Login = ({ flag, setFlag }) => {
 
   const forgotPage = () => {
     history.push("/forgot");
-    
-  }
+  };
 
   return (
     <div>
@@ -47,7 +48,7 @@ const Login = ({ flag, setFlag }) => {
             type="email"
             name="email"
             value={data.email}
-            onChange={e => setData({ ...data, email: e.target.value })}
+            onChange={(e) => setData({ ...data, email: e.target.value })}
           />
           <br />
           Password :
@@ -56,14 +57,23 @@ const Login = ({ flag, setFlag }) => {
             type="text"
             name="password"
             value={data.password}
-            onChange={e => setData({ ...data, password: e.target.value })}
+            onChange={(e) => setData({ ...data, password: e.target.value })}
           />
           <br />
           <br />
-          <button type="submit">Login</button>
+          {/* <button type="submit">Login</button> */}
+          <Button
+            style={{ padding: "8px", marginBottom: "4px" }}
+            variant="info"
+            type="submit"
+          >
+            Login
+          </Button>
           <br />
         </form>
-        <button onClick={()=>forgotPage()}  >Forgot Password</button>
+        <Button variant="danger" onClick={() => forgotPage()}>
+          Forgot Password
+        </Button>
         {redirect ? <Redirect to="/dashboard" /> : null}
       </div>
     </div>

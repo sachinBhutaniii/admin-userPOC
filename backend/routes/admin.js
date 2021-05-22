@@ -17,9 +17,12 @@ router.post("/search", (req, res) => {
   const serachTerm = req.body.name;
   // console.log("NAMEEEEE", serachTerm);
 
-  User.find({ name: { $regex: serachTerm, $options: "$i" } }).then(result =>
-    res.send(result)
-  );
+  User.find({
+    $and: [
+      { role: { $ne: 1 } },
+      { name: { $regex: serachTerm, $options: "$i" } },
+    ],
+  }).then((result) => res.send(result));
 });
 
 module.exports = router;
