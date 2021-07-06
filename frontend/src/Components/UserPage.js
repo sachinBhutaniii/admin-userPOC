@@ -4,10 +4,35 @@ import cookie from "react-cookies";
 
 import { Button, Card } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
+import FileBase from "react-file-base64";
+import Modal from "react-bootstrap/Modal";
 
 const UserPage = () => {
   const [tokenVal, setTokenVal] = useState("");
   const [Flag, setFlag] = useState(false);
+  const [add, setAdd] = useState(false);
+
+  const [myBlogs, setMyBlogs] = useState([]);
+
+  //for new user
+  const [blog, setBlog] = useState({
+    blogTitle: "",
+    blogDescription: "",
+    file: "",
+  });
+
+  const [show, setShow] = useState(false);
+  const handleClose = () => {
+    let newObj = {
+      blogTitle: "",
+      blogDescription: "",
+      file: "",
+    };
+    setBlog(newObj);
+    setShow(false);
+  };
+
+  const handleShow = () => setShow(true);
 
   const [details, setDetails] = useState({
     _id: "",
@@ -16,6 +41,7 @@ const UserPage = () => {
     password: "",
     role: "",
     category: "",
+    file: "",
   });
 
   //change password
@@ -42,7 +68,7 @@ const UserPage = () => {
           }
         )
         .then((result) => {
-          console.log("Extracted data is ", result);
+          // console.log("Extracted data is ", result);
 
           setDetails({
             ...details,
@@ -52,6 +78,7 @@ const UserPage = () => {
             email: result.data.email,
             role: result.data.role,
             category: result.data.category,
+            file: result.data.file,
           });
         })
         .catch((err) => console.log(err));
@@ -102,8 +129,8 @@ const UserPage = () => {
     axios
       .put(`http://localhost:8080/api/user/${id}`, details)
       .then((res) => {
-        console.log("RESPONSE of put request: ", res);
-        console.log("RESPONSE", res.status);
+        // console.log("RESPONSE of put request: ", res);
+        // console.log("RESPONSE", res.status);
         alert("Successfully Updated");
       })
       .catch((err) => {
@@ -111,24 +138,154 @@ const UserPage = () => {
       });
   };
 
+  useEffect(() => {
+    // console.log("User Blogs", details._id);
+    //use Effect for getting blogs of a particular user
+    details._id &&
+      axios
+        .get(`http://localhost:8080/api/user/getMyBlogs/${details._id}`)
+        .then((result) => {
+          setMyBlogs(result.data);
+          console.log("My Blogs", result.data);
+        })
+        .catch((err) => console.log(err));
+  }, [details, add]);
+
+  const sendBlogAddRequest = (e) => {
+    e.preventDefault();
+    console.log("Final data is ", blog);
+
+    const tok = cookie.load("auth-token");
+    setTokenVal(tok);
+
+    tokenVal &&
+      axios
+        .post(
+          `http://localhost:8080/api/user/postblogs`,
+          blog,
+          tokenVal && {
+            headers: {
+              "auth-token": tokenVal, //the token is a variable which holds the token
+            },
+          }
+        )
+        .then((result) => {
+          console.log("Result is ", result);
+          setShow(false);
+          setAdd(!add);
+        })
+        .catch((err) => console.log(err));
+  };
+
+  const deleteBlog = (id) => {
+    axios
+      .delete(`http://localhost:8080/api/user/deleteBlog/${id}`)
+      .then((result) => {
+        console.log("result delte", result);
+        if (result.status == 200) alert("Blog Successfully Deleted");
+        setAdd(!add);
+      })
+      .catch((err) => console.log("Error while deleting", err));
+  };
+
   return (
     <div>
+      <Modal
+        show={show}
+        onHide={handleClose}
+        backdrop="static"
+        keyboard={false}
+        size="md"
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Add Blog</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <div className="blogform">
+            <form onSubmit={sendBlogAddRequest}>
+              <label className="bloglabel"> Blog Title : </label>
+              <br />
+              <input
+                type="text"
+                name="name"
+                value={blog.blogTitle}
+                onChange={(e) =>
+                  setBlog({ ...blog, blogTitle: e.target.value })
+                }
+              />
+              <br />
+              <label className="bloglabel"> Blog Picture : </label>
+              <br />
+              <FileBase
+                type="file"
+                multiple={false}
+                onDone={({ base64 }) => setBlog({ ...blog, file: base64 })}
+              />
+              <br />
+              <label className="bloglabel">Blog Description :</label>
+              <br />
+              <input
+                type="text"
+                value={blog.blogDescription}
+                onChange={(e) =>
+                  setBlog({ ...blog, blogDescription: e.target.value })
+                }
+              />
+              <br />
+              <br />
+              <Button variant="info" type="submit">
+                Done
+              </Button>
+              <Button
+                style={{ marginLeft: "15px" }}
+                variant="secondary"
+                onClick={handleClose}
+              >
+                Close
+              </Button>
+              <br />
+            </form>
+          </div>
+        </Modal.Body>
+      </Modal>
       <h1>Welcome to User dashboard</h1>
       {/* <h2>{details.name}</h2>
       <h2>{details.email}</h2>
       <h2>{details._id}</h2>
       <h2>{details.password}</h2> */}
-      <div className="box">
+      <div className="box user-box">
         <Card
           border="dark"
           style={{
             width: "40rem",
             // marginLeft: "450px",
             marginBottom: "15px",
-            backgroundColor: "#DEDBDB",
+            backgroundColor: "#666666",
           }}
         >
           <Card.Body>
+            <h4>Profile Picture</h4>
+
+            <img
+              src={details.file}
+              style={{
+                width: "50%",
+                height: "250px",
+                borderRadius: "50%",
+              }}
+              alt="profile pic"
+            />
+            <br></br>
+
+            {Flag ? (
+              <FileBase
+                type="file"
+                multiple={false}
+                onDone={({ base64 }) =>
+                  setDetails({ ...details, file: base64 })
+                }
+              />
+            ) : null}
             <p>Role is : {details.role == 0 ? "User" : "Admin"}</p>
             <p>Category is : {details.category.name}</p>
 
@@ -220,6 +377,57 @@ const UserPage = () => {
             ) : null}
           </Card.Body>
         </Card>
+      </div>
+      <Button variant="dark" onClick={handleShow}>
+        ADD A NEW BLOG
+      </Button>
+      <br></br>
+      <hr className="hrblog"></hr>
+
+      <div className="">
+        <h2>My Blogs</h2>
+
+        <div className="row  myblogss">
+          {myBlogs &&
+            myBlogs.map((blog) => (
+              <div className="p-2 col-6">
+                <Card
+                  border="dark"
+                  style={{
+                    width: "40rem",
+                    backgroundColor: "#000000",
+                    borderRadius: "20px",
+                  }}
+                >
+                  <Card.Body>
+                    <div>
+                      <p className="blogtxt"> {blog.name}</p>
+                      <img
+                        src={blog.file}
+                        style={{
+                          width: "80%",
+                          height: "350px",
+                          borderRadius: "10%",
+                        }}
+                        alt="profile pic"
+                      />
+                      <p className="blogtxt  blogDescTitle">Description :</p>
+                      <p className="blogtxt  blogDesc">{blog.description}</p>
+                    </div>
+                  </Card.Body>
+                  <div className="ButtonDiv">
+                    <Button
+                      variant="danger"
+                      style={{ width: "90%", borderRadius: "10px" }}
+                      onClick={() => deleteBlog(blog._id)}
+                    >
+                      Delete
+                    </Button>
+                  </div>
+                </Card>
+              </div>
+            ))}
+        </div>
       </div>
     </div>
   );

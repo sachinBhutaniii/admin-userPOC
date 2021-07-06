@@ -13,19 +13,19 @@ import cookie from "react-cookies";
 import ErrorPage from "./Components/ErrorPage";
 import ForgotPasswordPage from "./Components/ForgotPasswordPage";
 import ResetPassword from "./Components/ResetPassword";
+import AllBlogs from "./Components/AllBlogs";
 
 function App() {
   const [cookiePresent, setCookiePresent] = useState();
   const [flag, setFlag] = useState(false);
   const [flag2, setFlag2] = useState();
 
-  
-
   useEffect(() => {
     setCookiePresent(document.cookie);
-    if (document.cookie){ setFlag2(true)
-    setFlag(true)}
-    
+    if (document.cookie) {
+      setFlag2(true);
+      setFlag(true);
+    }
   }, [flag]);
 
   /*
@@ -51,7 +51,11 @@ function App() {
           <Switch>
             <Route exact path="/" component={Home} />
             <Route exact path="/forgot" component={ForgotPasswordPage} />
-            <Route exact path="/resetpassword:token" component={ResetPassword} />
+            <Route
+              exact
+              path="/resetpassword:token"
+              component={ResetPassword}
+            />
 
             {/* <Route exact path="/login" component={Login} /> */}
             <Route exact path="/dashboard" component={Check} />
@@ -62,6 +66,14 @@ function App() {
               exact
               path="/login"
               render={() => <Login flag={flag} setFlag={setFlag} />}
+            />
+
+            <Route
+              exact
+              path="/allblogs"
+              render={() =>
+                flag ? <AllBlogs /> : <Login flag={flag} setFlag={setFlag} />
+              }
             />
 
             {/* 

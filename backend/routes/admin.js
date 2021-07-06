@@ -22,7 +22,9 @@ router.post("/search", (req, res) => {
       { role: { $ne: 1 } },
       { name: { $regex: serachTerm, $options: "$i" } },
     ],
-  }).then((result) => res.send(result));
+  })
+    .populate("category")
+    .then((result) => res.send(result));
 });
 
 module.exports = router;

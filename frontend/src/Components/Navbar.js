@@ -35,11 +35,29 @@ const Navbar = ({ setCookiePresent, cookiePresent, flag, setFlag }) => {
           </li>
 
           {flag ? (
-            <li>
-              <Button variant="danger" onClick={clearCookie1}>
-                Logout
-              </Button>
-            </li>
+            <>
+              <li>
+                <Button variant="info">
+                  <Link className="dash" to="/allblogs">
+                    {" "}
+                    All Blogs{" "}
+                  </Link>
+                </Button>
+              </li>
+              <li>
+                <Button variant="secondary">
+                  <Link className="dash" to="/dashboard">
+                    {" "}
+                    DashBoard{" "}
+                  </Link>
+                </Button>
+              </li>
+              <li>
+                <Button variant="danger" onClick={clearCookie1}>
+                  Logout
+                </Button>
+              </li>
+            </>
           ) : (
             <li>
               <Button variant="outline-secondary">

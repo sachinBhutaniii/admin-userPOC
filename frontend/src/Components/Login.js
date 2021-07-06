@@ -4,6 +4,7 @@ import cookie from "react-cookies";
 import { Redirect, useHistory } from "react-router-dom";
 import { Button } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
+import "./custom.css";
 
 const Login = ({ flag, setFlag }) => {
   const [redirect, setRedirect] = useState();
@@ -41,8 +42,8 @@ const Login = ({ flag, setFlag }) => {
     <div>
       <h1>Login Page</h1>
       <div className="form-div">
-        <form onSubmit={sendRequest}>
-          Email :
+        <form onSubmit={sendRequest} className="loginForm">
+          <label className="labl"> Email : </label>
           <br />
           <input
             type="email"
@@ -51,7 +52,7 @@ const Login = ({ flag, setFlag }) => {
             onChange={(e) => setData({ ...data, email: e.target.value })}
           />
           <br />
-          Password :
+          <label className="labl">Password :</label>
           <br />
           <input
             type="text"
@@ -60,18 +61,23 @@ const Login = ({ flag, setFlag }) => {
             onChange={(e) => setData({ ...data, password: e.target.value })}
           />
           <br />
-          <br />
+
           {/* <button type="submit">Login</button> */}
           <Button
             style={{ padding: "8px", marginBottom: "4px" }}
             variant="info"
             type="submit"
+            className="logbutton"
           >
             Login
           </Button>
           <br />
         </form>
-        <Button variant="danger" onClick={() => forgotPage()}>
+        <Button
+          variant="danger"
+          className="forgotpass"
+          onClick={() => forgotPage()}
+        >
           Forgot Password
         </Button>
         {redirect ? <Redirect to="/dashboard" /> : null}

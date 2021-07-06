@@ -6,4 +6,51 @@ li {
   padding-left: 10px;
 }
 
+.dash {
+  color: white;
+}
 
+.form-div {
+  padding-top: 30px;
+  padding-left: 500px;
+  padding-right: 500px;
+}
+
+.loginForm {
+  border: rgb(18, 158, 201) 2px solid;
+  border-radius: 15px;
+  padding: 80px;
+  background-color: black;
+}
+
+.forgotpass {
+  margin-top: 15px;
+}
+
+.labl {
+  font-size: 22px;
+  color: grey;
+}
+
+.logbutton {
+  margin-top: 35px;
+  width: 25%;
+}
+
+.blogtxt {
+  color: white;
+  text-align: left;
+}
+
+.blogDesc {
+  padding-top: 2px;
+}
+
+.blogDescTitle {
+  padding-top: 20px;
+  color: rgb(160, 158, 158);
+}
+
+.authname {
+  color: white;
+}

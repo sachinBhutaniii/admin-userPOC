@@ -38,11 +38,43 @@
 }
 
 p {
-  font-size: 30px;
-  color: royalblue;
+  font-size: 25px;
+  color: white;
 }
 
 .box {
+  /* display: flex;
+  justify-content: center; */
+}
+.user-box {
   display: flex;
+  text-align: center;
   justify-content: center;
+  align-items: center;
+}
+
+.form-content {
+  text-align: center;
+}
+
+.blogform {
+  text-align: center;
+}
+
+.bloglabel {
+  font-size: 22px;
+}
+
+.myblogs {
+  padding-top: 40px;
+  padding-bottom: 40px;
+}
+
+.ButtonDiv {
+  text-align: center;
+  padding-bottom: 15px;
+}
+
+.myblogss {
+  padding-left: 5px;
 }

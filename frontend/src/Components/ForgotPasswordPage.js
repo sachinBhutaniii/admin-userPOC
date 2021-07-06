@@ -21,8 +21,8 @@ const ForgotPasswordPage = () => {
       axios
         .post("http://localhost:8080/api/user/forgetpassword", { email: email })
         .then((res) => {
-          //console.log(res)
-          if (res.status == 200) alert("Mail Sent");
+          console.log("forgoooooooooootttttttttttttttttttttt", res);
+          if (res.status == 200) alert("Mail Sent , Please Check your email");
         })
         .catch((err) => {
           console.log(err);

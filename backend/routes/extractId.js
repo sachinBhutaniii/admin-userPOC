@@ -8,7 +8,7 @@ router.get("/", verify, async (req, res) => {
     "category"
   );
 
-  console.log("ExtractedUser is : ", ExtractedUser);
+  // console.log("ExtractedUser is : ", ExtractedUser);
   res.send(ExtractedUser);
 });
 

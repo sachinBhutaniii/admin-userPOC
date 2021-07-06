@@ -4,11 +4,15 @@
 // const app = express();
 const router = require("express").Router();
 const User = require("../model/User");
+const Blog = require("../model/Blog");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const verify = require("./verifyToken");
 const dotenv = require("dotenv");
 const nodemailer = require("nodemailer");
+
+//send grid
+const sgMail = require("@sendgrid/mail");
 
 const crypto = require("crypto");
 // //for cookies
@@ -19,6 +23,8 @@ dotenv.config();
 //express validator
 const { check, validationResult } = require("express-validator");
 
+sgMail.setApiKey(`SG.${process.env.APIKEY}`);
+
 // // if person logged in is a user
 // router.get("/", verify, async (req, res) => {
 //   const loggedin_user = await User.findOne({ _id: req.user._id });
@@ -27,6 +33,25 @@ const { check, validationResult } = require("express-validator");
 //   if (loggedin_user.role === 0) res.send("Welcome to User Dashboard");
 //   else res.status(400).send("Access Denied , Please login as a USER");
 // });
+
+//get a blogs of a single user
+router.get("/getMyBlogs/:id", async (req, res) => {
+  console.log("Id Recieved is ", req.params.id);
+
+  Blog.find({ author: req.params.id })
+    .populate("author")
+    .then((result) => res.send(result))
+    .catch((err) => console.log(err));
+});
+
+//delete a blogs of a single user
+router.delete("/deleteBlog/:id", async (req, res) => {
+  console.log("Id Recieved for delete is ", req.params.id);
+
+  Blog.deleteOne({ _id: req.params.id })
+    .then((result) => res.send(result))
+    .catch((err) => res.send(err));
+});
 
 //get all users
 router.get("/all", verify, async (req, res) => {
@@ -41,6 +66,46 @@ router.get("/all", verify, async (req, res) => {
     .populate("category")
     .then((result) => res.send(result))
     .catch((err) => console.log(err));
+});
+
+//view all blogs
+router.get("/allBlogs", async (req, res) => {
+  Blog.find()
+    .populate("author")
+    .then((result) => res.send(result))
+    .catch((err) => console.log(err));
+});
+
+//adding a blog
+router.post("/postblogs", verify, async (req, res) => {
+  const blogTitle = req.body.blogTitle;
+  const blogDescription = req.body.blogDescription;
+  const file = req.body.file ? req.body.file : "";
+
+  // console.log("Blog post body", blogTitle, blogDescription);
+
+  if (!blogTitle || blogTitle.length < 5) {
+    res.send("Blog Title is required and length should be more than 5");
+  } else if (!blogDescription || blogDescription.length < 10) {
+    res.send("Blog Description is required and length should be more than 10");
+  } else {
+    const user = await User.findById({ _id: req.user._id });
+    // console.log("POST BLOG API", user.name);
+    // res.send(user);
+
+    const blog = new Blog({
+      name: blogTitle,
+      description: blogDescription,
+      file: file,
+      author: user._id,
+    });
+
+    // console.log("Blog created is", blog);
+    blog
+      .save()
+      .then((result) => res.send(result))
+      .catch((err) => res.status(404).send(err));
+  }
 });
 
 //updating old password
@@ -174,6 +239,7 @@ router.post(
       password: hashPassword,
       role: req.body.role,
       category: req.body.category,
+      file: req.body.file,
     });
     user
       .save()
@@ -183,12 +249,12 @@ router.post(
 );
 
 //get a single user
-router.get("/:id", (req, res) => {
-  User.findById(req.params.id)
-    .populate("category")
-    .then((result) => res.send(result))
-    .catch((err) => res.status(400).send(err));
-});
+// router.get("/:id", (req, res) => {
+//   User.findById(req.params.id)
+//     .populate("category")
+//     .then((result) => res.send(result))
+//     .catch((err) => res.status(400).send(err));
+// });
 
 //verify password
 router.put(
@@ -294,6 +360,7 @@ router.put(
             email: req.body.email,
             category: req.body.category,
             status: req.body.status,
+            file: req.body.file,
           },
         }
       )
@@ -320,53 +387,8 @@ router.put(
 );
 
 // forget passowrd
+
 /*
-router.post("/forgetpassword", (req, res) => {
-  if (req.body.email === "") {
-    res.status(400).send("Email Required");
-  }
-
-  User.findOne({ email: req.body.email }).then(result => {
-    if (result === null) {
-      res.status(403).send("Email Not In DB");
-    } else {
-      // res.send(result);
-      //send mail
-
-      //account sending the mail
-      const transporter = nodemailer.createTransport({
-        service: "smtp.ethereal.email",
-        auth: {
-          user: "cielo.torphy@ethereal.email",
-          pass: `GaUFa8pFy3gwern98B`,
-        },
-      });
-
-      const mailoptions = {
-        from: "no-reply@nodemailer.com",
-        to: `${req.body.email}`,
-        subject: "link to reset",
-        text:
-          `Click on the link below to reset your password \n ` +
-          `http://localhost:3000/resetpassword`,
-        http: `<a href="http://localhost:3000/resetpassword" >Click Here</a>`,
-      };
-
-      transporter.sendMail(mailoptions, (err, response) => {
-        if (err) {
-          res.send("There was an error while sending mail");
-        } else {
-          console.log(response);
-          res.status(200).send("Recovery Email sent ");
-        }
-      });
-
-      //else close
-    }
-  });
-});
-*/
-
 router.post("/forgetpassword", (req, res) => {
   crypto.randomBytes(32, (err, buffer) => {
     if (err) {
@@ -415,6 +437,57 @@ router.post("/forgetpassword", (req, res) => {
             } else {
               console.log("Email sent: " + info.response);
               res.send("Email sent");
+            }
+          });
+        });
+      }
+    });
+  });
+});
+*/
+
+//using send grid
+router.post("/forgetpassword", (req, res) => {
+  crypto.randomBytes(32, (err, buffer) => {
+    if (err) {
+      console.log(err);
+    }
+
+    const token = buffer.toString("hex");
+
+    if (req.body.email === "") {
+      res.status(400).send("Email Required");
+    }
+
+    User.findOne({ email: req.body.email }).then((result) => {
+      if (result === null) {
+        res.status(403).send("Email Not In DB");
+      } else {
+        //result store the entire user object
+        // console.log("RESULTS OF FORGOT", result)
+
+        result.resetToken = token;
+        result.expireToken = Date.now() + 3600000; //expires after 1 hour ie usercant reset pass after 1 hout
+        result.save().then((result) => {
+          //sending mail
+
+          const msg = {
+            to: `${req.body.email}`,
+            from: "bhutani.sachin1019@gmail.com",
+            subject:
+              "Looks Like you dont remember your password , No worries we have got you covered",
+            // text: "Helloooooooooooooooooooooooo",
+            html: ` <h1>Click On The Link Below To Reset Your Password </h1>
+             <a href="http://localhost:3000/resetpassword${token}">Forgot Password</a>`,
+          };
+
+          sgMail.send(msg, function (err, info) {
+            if (err) {
+              console.log("Errorin sending Mail", err);
+              res.status(400).send(err);
+            } else {
+              console.log("Mail sent ");
+              res.status(200).send("Mail Send");
             }
           });
         });

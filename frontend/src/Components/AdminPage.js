@@ -3,19 +3,17 @@ import React, { useEffect, useState } from "react";
 import cookie from "react-cookies";
 import { Button, Card } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
+import Modal from "react-bootstrap/Modal";
+import FileBase from "react-file-base64";
 
 const AdminPage = () => {
   const [data, setData] = useState();
   const [tokenVal, setTokenVal] = useState("");
-
   const [editflag, setEditFlag] = useState();
   const [fieled, setField] = useState(); //do diplay input field on that index only
-
   const [demo, setDemo] = useState(false);
   //for adding user
-
   // const [user, setUser] = useState(false);
-
   //search
   const [searchTerm, setSeachterm] = useState({
     name: "",
@@ -28,11 +26,38 @@ const AdminPage = () => {
     email: "",
     password: "",
     category: "",
+    file: "",
   });
 
   const [category, setCategory] = useState();
-
   const [userForm, setUserForm] = useState(false);
+
+  const [show, setShow] = useState(false);
+  const handleClose = () => {
+    let newObj = {
+      name: "",
+      email: "",
+      password: "",
+      category: "",
+      file: "",
+    };
+    setAddUser(newObj);
+    setShow(false);
+  };
+  const handleShow = () => setShow(true);
+
+  //for delete modal
+  const [show2, setShow2] = useState(false);
+  const handleClose2 = () => {
+    setShow2(false);
+    setToBeDel();
+  };
+  const handleShow2 = (index) => {
+    setToBeDel(index);
+    setShow2(true);
+  };
+
+  const [toBeDel, setToBeDel] = useState();
 
   useEffect(() => {
     axios
@@ -47,7 +72,7 @@ const AdminPage = () => {
   }, []);
 
   useEffect(() => {
-    console.log(searchTerm);
+    // console.log(searchTerm);
 
     //search API
     searchTerm &&
@@ -82,10 +107,11 @@ const AdminPage = () => {
         });
         // setData(res.data);
         setDemo(!demo);
+        handleClose();
       })
       .catch((err) => {
-        // console.log("AXIOS ERROR: ", err.response.data);
-        alert(err.message);
+        // console.log("AXIOS ERROR: ", err.response.data.message);
+        alert(err.response?.data.errors);
       });
 
     //redirecting
@@ -115,7 +141,7 @@ const AdminPage = () => {
         setDemo(!demo);
       })
       .catch((err) => {
-        alert(err.response.data);
+        alert(err.response.data.errors);
         setDemo(!demo);
       });
   };
@@ -151,6 +177,7 @@ const AdminPage = () => {
   // };
 
   const deletedata = (index) => {
+    console.log("Index to be deleted recieved is ", index);
     // console.log(data[index]._id);
 
     axios
@@ -160,6 +187,7 @@ const AdminPage = () => {
         // setData(res.data);
         console.log("RESPONSE of delte", res);
         setDemo(!demo);
+        handleClose2();
       })
       .catch((err) => {
         console.log("AXIOS ERROR: ", err);
@@ -216,7 +244,7 @@ const AdminPage = () => {
       })
       .catch((err) => {
         console.log("AXIOS ERROR: ", err);
-        alert(err);
+        alert(err.response?.data?.errors);
         setDemo(!demo);
       });
   };
@@ -232,260 +260,166 @@ const AdminPage = () => {
       <br></br>
       <br></br>
       <hr></hr>
-      <Button variant="dark" onClick={() => setUserForm(true)}>
+      <Button
+        variant="dark"
+        /* onClick={() => setUserForm(true) } */
+        onClick={handleShow}
+      >
         ADD USER
       </Button>
-      <br></br>
-      <br></br>
 
-      {userForm ? (
-        <div>
-          <div className="drop-div">
-            <label for="matches">Choose a category:</label>
-            <div>
-              <select className="category" onChange={(e) => handleDropdown(e)}>
-                {category &&
-                  category.map((i) => <option value={i._id}>{i.name}</option>)}
-              </select>
+      <Modal show={show} onHide={handleClose}>
+        <Modal.Header closeButton>
+          <Modal.Title>Enter User Details</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <div className="form-content">
+            <div className="drop-div">
+              <label for="matches">Choose a category:</label>
+              <div>
+                <select
+                  className="category"
+                  onChange={(e) => handleDropdown(e)}
+                >
+                  {category &&
+                    category.map((i) => (
+                      <option value={i._id}>{i.name}</option>
+                    ))}
+                </select>
+              </div>
+            </div>
+            <br></br>
+
+            <div className="form-div-modal">
+              <form onSubmit={sendRequest}>
+                Name :
+                <br />
+                <input
+                  type="text"
+                  name="name"
+                  value={addUser.name}
+                  onChange={(e) =>
+                    setAddUser({ ...addUser, name: e.target.value })
+                  }
+                />
+                <br />
+                ProflePic :
+                <br />
+                <FileBase
+                  type="file"
+                  multiple={false}
+                  onDone={({ base64 }) =>
+                    setAddUser({ ...addUser, file: base64 })
+                  }
+                />
+                <br />
+                Email :
+                <br />
+                <input
+                  type="email"
+                  name="email"
+                  value={addUser.email}
+                  onChange={(e) =>
+                    setAddUser({ ...addUser, email: e.target.value })
+                  }
+                />
+                <br />
+                Password :
+                <br />
+                <input
+                  type="text"
+                  name="password"
+                  value={addUser.password}
+                  onChange={(e) =>
+                    setAddUser({ ...addUser, password: e.target.value })
+                  }
+                />
+                <br />
+                <br />
+                <Button variant="info" type="submit">
+                  Done
+                </Button>
+                <Button
+                  style={{ marginLeft: "15px" }}
+                  variant="secondary"
+                  onClick={handleClose}
+                >
+                  Close
+                </Button>
+                <br />
+              </form>
             </div>
           </div>
-          <br></br>
+        </Modal.Body>
+      </Modal>
 
-          <div className="form-div">
-            <form onSubmit={sendRequest}>
-              Name :
-              <br />
-              <input
-                type="text"
-                name="name"
-                value={addUser.name}
-                onChange={(e) =>
-                  setAddUser({ ...addUser, name: e.target.value })
-                }
-              />
-              <br />
-              Email :
-              <br />
-              <input
-                type="email"
-                name="email"
-                value={addUser.email}
-                onChange={(e) =>
-                  setAddUser({ ...addUser, email: e.target.value })
-                }
-              />
-              <br />
-              Password :
-              <br />
-              <input
-                type="text"
-                name="password"
-                value={addUser.password}
-                onChange={(e) =>
-                  setAddUser({ ...addUser, password: e.target.value })
-                }
-              />
-              <br />
-              <br />
-              <Button variant="info" type="submit">
-                Done
-              </Button>
-              <br />
-            </form>
-          </div>
-        </div>
-      ) : null}
+      <br></br>
+      <br></br>
 
-      {/* {!searchTerm &&
-        data &&
-        category &&
-        data.map((i, index) => (
-          <div>
-            {console.log("Helloooooooooooooooooooooooooooooooooooooo")}
-            {i.role == 1 ? null : (
-              <div>
-                <h2>Name :</h2>
-                <p>{i.name}</p>
-                {editflag == 1 && fieled === index ? (
-                  <input
-                    type="text"
-                    placeholder={data[index].name}
-                    value={data[index].name}
-                    onChange={e => nameHandler(e, index)}
-                  />
-                ) : null}
-                <h2>Role:</h2>
-                <p>User </p>
-                <h2>Category :</h2>
-                <p>{i.category.name}</p>
-                {editflag == 1 && fieled === index ? (
-                  <div className="drop-div">
-                    <label for="matches">Choose a category:</label>
-                    <div>
-                      <select onChange={e => editCategory(e, index)}>
-                        {category &&
-                          category.map(i => (
-                            <option value={i._id}>{i.name}</option>
-                          ))}
-                      </select>
-                    </div>
-                  </div>
-                ) : null}
-                <h2>Email :</h2>
-                <p>{i.email}</p>{" "}
-                {editflag == 1 && fieled === index ? (
-                  <input
-                    type="email"
-                    placeholder={data[index].email}
-                    value={data[index].email}
-                    onChange={e => mailHandler(e, index)}
-                  />
-                ) : null}
-                <h2>DB ID :</h2>
-                <p>{i._id}</p>
-                <button onClick={() => showField(index)}>Edit</button>
-                <button onClick={() => deletedata(index)}>Delete</button>
-                <p> </p>
-                {editflag == 1 && fieled === index ? (
-                  <button onClick={() => hideField(index)}>Done</button>
-                ) : null}
-                {i.status == 1 ? (
-                  <button onClick={() => changeStatus(index)}>Deactive</button>
-                ) : (
-                  <button onClick={() => changeStatus(index)}>Activate</button>
-                )}
-                <hr></hr>
-              </div>
-            )}
-          </div>
-        ))} */}
+      <Modal
+        show={show2}
+        onHide={handleClose2}
+        backdrop="static"
+        keyboard={false}
+        size="sm"
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Delete User ?</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>Are you Sure You Want To Delete This User ?</Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleClose2}>
+            Close
+          </Button>
+          <Button variant="danger" onClick={() => deletedata(toBeDel)}>
+            Yes , I am sure
+          </Button>
+        </Modal.Footer>
+      </Modal>
 
-      {searchTerm &&
-      searchTerm.name.length > 0 &&
-      searchResult &&
-      searchResult.length > 0 ? (
-        searchResult.map((i, index) => (
-          <div className="box">
-            <Card
-              border="dark"
-              style={{
-                width: "40rem",
-                // marginLeft: "450px",
-                marginBottom: "15px",
-                backgroundColor: "#DEDBDB",
-              }}
-            >
-              <div>
-                <Card.Body>
-                  {i.role == 1 ? null : (
-                    <div>
-                      <h2>Name :</h2>
-                      <p>{i.name}</p>
-                      {editflag == 1 && fieled === index ? (
-                        <input
-                          type="text"
-                          placeholder={data[index].name}
-                          value={data[index].name}
-                          onChange={(e) => nameHandler(e, index)}
-                        />
-                      ) : null}
-                      <h2>Role:</h2>
-                      <p>User </p>
-                      <h2>Category :</h2>
-                      <p>{i.category.name}</p>
-                      {editflag == 1 && fieled === index ? (
-                        <div className="drop-div">
-                          <label for="matches">Choose a category:</label>
-                          <div>
-                            <select onChange={(e) => editCategory(e, index)}>
-                              {category &&
-                                category.map((i) => (
-                                  <option value={i._id}>{i.name}</option>
-                                ))}
-                            </select>
-                          </div>
-                        </div>
-                      ) : null}
-                      <h2>Email :</h2>
-                      <p>{i.email}</p>{" "}
-                      {editflag == 1 && fieled === index ? (
-                        <input
-                          type="email"
-                          placeholder={data[index].email}
-                          value={data[index].email}
-                          onChange={(e) => mailHandler(e, index)}
-                        />
-                      ) : null}
-                      <h2>DB ID :</h2>
-                      <p>{i._id}</p>
-                      {/* <p>{i.password}</p> */}
-                      <Button
-                        variant="secondary"
-                        style={{ marginRight: "4px" }}
-                        onClick={() => showField(index)}
-                      >
-                        Edit
-                      </Button>
-                      <Button
-                        variant="warning"
-                        onClick={() => deletedata(index)}
-                      >
-                        Delete
-                      </Button>
-                      <p> </p>
-                      {editflag == 1 && fieled === index ? (
-                        <Button
-                          style={{ marginRight: "4px" }}
-                          onClick={() => hideField(index)}
-                        >
-                          Done
-                        </Button>
-                      ) : null}
-                      {i.status == 1 ? (
-                        <Button
-                          variant="danger"
-                          onClick={() => changeStatus(index)}
-                        >
-                          Deactive
-                        </Button>
-                      ) : (
-                        <Button
-                          variant="danger"
-                          onClick={() => changeStatus(index)}
-                        >
-                          Activate
-                        </Button>
-                      )}
-                      <hr></hr>
-                    </div>
-                  )}
-                </Card.Body>
-              </div>
-            </Card>
-          </div>
-        ))
-      ) : searchTerm && searchTerm.name.length > 0 ? (
-        <h2 style={{ color: "red" }}>No Such User</h2>
-      ) : (
-        <div>
-          <h1>All User</h1>
-          {data &&
-            data.map((i, index) => (
-              <div className="box">
+      <br></br>
+      <br></br>
+
+      <div className="row">
+        {searchTerm &&
+        searchTerm.name.length > 0 &&
+        searchResult &&
+        searchResult.length > 0 ? (
+          searchResult.map((i, index) => (
+            <div className="row">
+              <div className="p-2 col-md-4">
                 <Card
                   border="dark"
                   style={{
                     width: "40rem",
-                    // marginLeft: "450px",
+                    marginLeft: "450px",
                     marginBottom: "15px",
-                    backgroundColor: "#DEDBDB",
+                    backgroundColor: "#666666",
                   }}
                 >
                   <Card.Body>
                     {i.role == 1 ? null : (
                       <div>
-                        <h2>Name :</h2>
-                        <p>{i.name}</p>
+                        <h4>Profile Picture</h4>
+                        <img
+                          src={i.file}
+                          style={{
+                            width: "50%",
+                            height: "250px",
+                            borderRadius: "50%",
+                          }}
+                          alt="profile pic"
+                        />
+                        <div className="row info">
+                          <div className="col"></div>
+                          <div className="col">
+                            <h4>Name :</h4>
+                          </div>
+                          <div className="col">
+                            <p>{i.name}</p>
+                          </div>
+                          <div className="col"></div>
+                        </div>
                         {editflag == 1 && fieled === index ? (
                           <input
                             type="text"
@@ -494,10 +428,27 @@ const AdminPage = () => {
                             onChange={(e) => nameHandler(e, index)}
                           />
                         ) : null}
-                        <h2>Role:</h2>
-                        <p>User </p>
-                        <h2>Category :</h2>
-                        <p>{i.category.name}</p>
+                        <div className="row">
+                          <div className="col"></div>
+                          <div className="col">
+                            <h4>Role:</h4>
+                          </div>
+                          <div className="col">
+                            <p>User </p>
+                          </div>
+                          <div className="col"></div>
+                        </div>
+
+                        <div className="row">
+                          <div className="col"></div>
+                          <div className="col">
+                            <h4>Category:</h4>
+                          </div>
+                          <div className="col">
+                            <p>{i.category.name}</p>
+                          </div>
+                          <div className="col"></div>
+                        </div>
                         {editflag == 1 && fieled === index ? (
                           <div className="drop-div">
                             <label for="matches">Choose a category:</label>
@@ -511,8 +462,16 @@ const AdminPage = () => {
                             </div>
                           </div>
                         ) : null}
-                        <h2>Email :</h2>
-                        <p>{i.email}</p>{" "}
+                        <div className="row">
+                          <div className="col"></div>
+                          <div className="col">
+                            <h4>Email:</h4>
+                          </div>
+                          <div className="col">
+                            <p>{i.email}</p>
+                          </div>
+                          <div className="col"></div>
+                        </div>
                         {editflag == 1 && fieled === index ? (
                           <input
                             type="email"
@@ -521,8 +480,17 @@ const AdminPage = () => {
                             onChange={(e) => mailHandler(e, index)}
                           />
                         ) : null}
-                        <h2>DB ID :</h2>
-                        <p>{i._id}</p>
+                        <div className="row">
+                          <div className="col"></div>
+                          <div className="col">
+                            <h4>DB ID:</h4>
+                          </div>
+                          <div className="col">
+                            <p>{i._id}</p>
+                          </div>
+                          <div className="col"></div>
+                        </div>
+
                         {/* <p>{i.password}</p> */}
                         <Button
                           variant="secondary"
@@ -533,7 +501,8 @@ const AdminPage = () => {
                         </Button>
                         <Button
                           variant="warning"
-                          onClick={() => deletedata(index)}
+                          // onClick={() => deletedata(index)}
+                          onClick={() => handleShow2(index)}
                         >
                           Delete
                         </Button>
@@ -567,9 +536,169 @@ const AdminPage = () => {
                   </Card.Body>
                 </Card>
               </div>
-            ))}
-        </div>
-      )}
+            </div>
+          ))
+        ) : searchTerm && searchTerm.name.length > 0 ? (
+          <h2 style={{ color: "red" }}>No Such User</h2>
+        ) : (
+          <div className="row">
+            <h1>All User</h1>
+            {data &&
+              data.map((i, index) => (
+                <div className="p-2 col-md-4">
+                  <Card
+                    border="dark"
+                    style={{
+                      width: "30rem",
+                      // marginLeft: "450px",
+                      // marginBottom: "15px",
+                      backgroundColor: "#666666",
+                      borderRadius: "75px",
+                    }}
+                  >
+                    <Card.Body>
+                      {i.role == 1 ? null : (
+                        <div>
+                          <h4>Profile Picture</h4>
+                          <img
+                            src={i.file}
+                            style={{
+                              width: "50%",
+                              height: "250px",
+                              borderRadius: "50%",
+                            }}
+                            alt="profile pic"
+                          />
+                          <div className="row info">
+                            <div className="col"></div>
+                            <div className="col">
+                              <h4>Name :</h4>
+                            </div>
+                            <div className="col">
+                              <p>{i.name}</p>
+                            </div>
+                            <div className="col"></div>
+                          </div>
+                          {editflag == 1 && fieled === index ? (
+                            <input
+                              type="text"
+                              placeholder={data[index].name}
+                              value={data[index].name}
+                              onChange={(e) => nameHandler(e, index)}
+                            />
+                          ) : null}
+                          <div className="row">
+                            <div className="col"></div>
+                            <div className="col">
+                              <h4>Role:</h4>
+                            </div>
+                            <div className="col">
+                              <p>User </p>
+                            </div>
+                            <div className="col"></div>
+                          </div>
+
+                          <div className="row">
+                            <div className="col"></div>
+                            <div className="col">
+                              <h4>Category:</h4>
+                            </div>
+                            <div className="col">
+                              <p>{i.category.name}</p>
+                            </div>
+                            <div className="col"></div>
+                          </div>
+                          {editflag == 1 && fieled === index ? (
+                            <div className="drop-div">
+                              <label for="matches">Choose a category:</label>
+                              <div>
+                                <select
+                                  onChange={(e) => editCategory(e, index)}
+                                >
+                                  {category &&
+                                    category.map((i) => (
+                                      <option value={i._id}>{i.name}</option>
+                                    ))}
+                                </select>
+                              </div>
+                            </div>
+                          ) : null}
+                          <div className="row">
+                            <div className="col"></div>
+                            <div className="col">
+                              <h4>Email:</h4>
+                            </div>
+                            <div className="col">
+                              <p>{i.email}</p>
+                            </div>
+                            <div className="col"></div>
+                          </div>
+                          {editflag == 1 && fieled === index ? (
+                            <input
+                              type="email"
+                              placeholder={data[index].email}
+                              value={data[index].email}
+                              onChange={(e) => mailHandler(e, index)}
+                            />
+                          ) : null}
+                          <div className="row">
+                            <div className="col">
+                              <h4>DB ID :</h4>
+                            </div>
+                            <div className="col">
+                              <p>{i._id}</p>
+                            </div>
+                          </div>
+
+                          {/* <p>{i.password}</p> */}
+                          <Button
+                            variant="secondary"
+                            onClick={() => showField(index)}
+                            style={{ marginRight: "4px" }}
+                          >
+                            Edit
+                          </Button>
+                          <Button
+                            variant="warning"
+                            // onClick={() => deletedata(index)}
+                            onClick={() => handleShow2(index)}
+                          >
+                            Delete
+                          </Button>
+                          <p> </p>
+                          {editflag == 1 && fieled === index ? (
+                            <Button
+                              style={{ marginRight: "4px" }}
+                              onClick={() => hideField(index)}
+                            >
+                              Done
+                            </Button>
+                          ) : null}
+                          {i.status == 1 ? (
+                            <Button
+                              variant="danger"
+                              onClick={() => changeStatus(index)}
+                            >
+                              Deactive
+                            </Button>
+                          ) : (
+                            <Button
+                              variant="danger"
+                              onClick={() => changeStatus(index)}
+                            >
+                              Activate
+                            </Button>
+                          )}
+                          <hr></hr>
+                        </div>
+                      )}
+                    </Card.Body>
+                  </Card>
+                </div>
+              ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 };

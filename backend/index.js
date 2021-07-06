@@ -15,9 +15,11 @@ const cors = require("cors");
 //const { check, validationResult } = require("express-validator");
 dotenv.config();
 
+app.use(express.json({ limit: "5mb", extended: true }));
 var cookieParser = require("cookie-parser");
 const { db } = require("./model/Category");
 app.use(cookieParser());
+app.use(cors());
 
 //connnect to DB
 
@@ -27,7 +29,7 @@ mongoose
     useUnifiedTopology: true,
     useCreateIndex: true,
   })
-  .then(result => {
+  .then((result) => {
     //db.Category.insertMany([{name:"Teacher"},{name:"Actor"},{name:"Doctor"},{name:"Painter"},{name:"Lawer"},{name:"Scientist"}])
 
     // result.Category.insertOne({name:"Abcdef"})
@@ -39,7 +41,7 @@ mongoose
 
     DB.collection("categories")
       .countDocuments()
-      .then(result => {
+      .then((result) => {
         if (result == 0) {
           DB.collection("categories").insertMany([
             { name: "Teacher" },
@@ -59,12 +61,11 @@ mongoose
     // .then(result = console.log(result))
     // .catch(err => console.log(err))
   })
-  .catch(err => console.log(err));
+  .catch((err) => console.log(err));
 
 //Middleware
 // app.use(express.json());
-app.use(cors());
-app.use(bodyParser.json());
+// app.use(bodyParser.json());
 //route middlewares
 app.use("/api/user", authRoute);
 app.use("/api/authorize", checkRoute);

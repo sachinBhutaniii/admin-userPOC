@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const {ObjectId} = mongoose.Schema; // for category
+const { ObjectId } = mongoose.Schema; // for category
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -10,7 +10,6 @@ const userSchema = new mongoose.Schema({
     max: 255,
   },
 
-
   email: {
     type: String,
     required: true,
@@ -18,12 +17,11 @@ const userSchema = new mongoose.Schema({
     min: 6,
   },
 
-
-  category:{
+  category: {
     type: ObjectId,
     ref: "Category", //from where we are pulling the id
-    required : true
-},
+    required: true,
+  },
 
   password: {
     type: String,
@@ -41,13 +39,17 @@ const userSchema = new mongoose.Schema({
     default: 0,
   },
 
-  resetToken:String,
-  expireToken : String,
+  file: {
+    type: String,
+  },
 
-  status:{
-    type:Number,
-    default:1 //active
-  }
+  resetToken: String,
+  expireToken: String,
+
+  status: {
+    type: Number,
+    default: 1, //active
+  },
 });
 
 module.exports = mongoose.model("User", userSchema);
